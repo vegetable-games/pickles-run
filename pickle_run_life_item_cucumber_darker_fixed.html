@@ -898,6 +898,8 @@ const BLOCKED_NAME_PARTS = [
   'sex','セックス','せっくす','ちんこ','ちんぽ','まんこ','おっぱい',
   'レイプ','強姦','ガイジ','キチガイ','穢多','非人'
 ];
+const RANKING_SCORE_MAX = 50000;
+const RANKING_COINS_MAX = 5000;
 function isBlockedName(name) {
   const normalized = String(name)
     .normalize('NFKC')
@@ -905,8 +907,17 @@ function isBlockedName(name) {
     .replace(/[\s\u200b-\u200d\ufeff._\-ー＿・※*＊!！?？]/g, '');
   return BLOCKED_NAME_PARTS.some(word => normalized.includes(word.normalize('NFKC').toLowerCase()));
 }
+function isValidRankingScore(scoreVal, coinsVal) {
+  return Number.isInteger(scoreVal)
+    && Number.isInteger(coinsVal)
+    && scoreVal >= 0
+    && scoreVal <= RANKING_SCORE_MAX
+    && coinsVal >= 0
+    && coinsVal <= RANKING_COINS_MAX;
+}
 
 async function submitScore(name, scoreVal, coinsVal) {
+  if (!isValidRankingScore(scoreVal, coinsVal)) return false;
   try {
     const res = await fetch(SUPABASE_URL + '/rest/v1/pickle_run_scores', {
       method: 'POST',
